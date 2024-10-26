@@ -1,48 +1,117 @@
 import os
 
-# Вказуємо директорію з .txt файлами
-directory = 'student_marks'
+def get_student_names(directory):
+    """
+    Зчитує та повертає список імен студентів із файлу student_names.txt.
 
-# Отримуємо всі .txt файли, окрім students.txt (файл з іменами)
-files = [file for file in os.listdir(directory) if file.endswith('.txt') and file != 'student_names.txt']
+    Args:
+        directory (str): Шлях до директорії з файлом student_names.txt.
 
-# Читаємо імена студентів з файлу student_names.txt
-with open(os.path.join(directory, 'student_names.txt'), 'r') as f:
-    student_names = [line.strip() for line in f.readlines()]
+    Returns:
+        list: Список імен студентів.
+    """
+    with open(os.path.join(directory, 'student_names.txt'), 'r') as f:
+        return [line.strip() for line in f.readlines()]
 
-# Створюємо словник для оцінок за предметами
-subject_marks = {file.replace('.txt', ''): [] for file in files}
+def get_subject_files(directory):
+    """
+    Повертає список файлів предметів, виключаючи student_names.txt.
 
-# Зчитуємо оцінки з кожного файлу та зберігаємо їх у словнику
-for txt_file in files:
-    subject_name = txt_file.replace('.txt', '')  # Назва предмета з імені файлу
-    file_path = os.path.join(directory, txt_file)  # Повний шлях до файлу
-    with open(file_path, 'r') as file:  # Відкриваємо файл для читання
-        marks = [int(line.strip()) for line in file.readlines()]  # Зчитуємо оцінки як числа
-        subject_marks[subject_name].extend(marks)  # Додаємо оцінки до відповідного предмета
+    Args:
+        directory (str): Шлях до директорії.
 
-# Перевіряємо, чи кількість студентів відповідає кількості оцінок у кожному предметі
-for subject, marks in subject_marks.items():
-    if len(marks) != len(student_names):
-        raise ValueError(f"Кількість оцінок у {subject} не відповідає кількості студентів.")
+    Returns:
+        list: Список файлів предметів.
+    """
+    return [file for file in os.listdir(directory) 
+            if file.endswith('.txt') and file != 'student_names.txt']
 
-# Створюємо словник, що містить оцінки для кожного студента за всі предмети
-student_data = {
-    student: {subject: subject_marks[subject][i] for subject in subject_marks}
-    for i, student in enumerate(student_names)
-}
+def read_subject_marks(files, directory):
+    """
+    Зчитує оцінки з файлів предметів та повертає їх у вигляді словника.
 
-# Виводимо результати у потрібному форматі
-for student, subjects in student_data.items():
-    print(f"Ім'я студента: {student}")
-    print("Оцінки з предметів:")
-    total_marks = 0
+    Args:
+        files (list): Список файлів предметів.
+        directory (str): Шлях до директорії з файлами.
 
-    for subject, mark in subjects.items():
-        print(f"{subject}: {mark}")
-        total_marks += mark
+    Returns:
+        dict: Словник із предметами та їхніми оцінками.
+    """
+    subject_marks = {file.replace('.txt', ''): [] for file in files}
+    for txt_file in files:
+        subject_name = txt_file.replace('.txt', '')  
+        file_path = os.path.join(directory, txt_file)
+        with open(file_path, 'r') as file:
+            marks = [int(line.strip()) for line in file.readlines()]
+            subject_marks[subject_name].extend(marks)
+    return subject_marks
 
-# Обчислюємо середнє значення оцінок
-    average = total_marks / len(subjects)
-    print(f"Середнє значення оцінок: {average:.2f}")  # Виводимо середнє з двома знаками після коми
-    print("-" * 30)  # Роздільник між студентами
+def validate_data(student_names, subject_marks):
+    """
+    Перевіряє відповідність кількості студентів кількості оцінок у кожному предметі.
+
+    Args:
+        student_names (list): Список імен студентів.
+        subject_marks (dict): Словник із предметами та їхніми оцінками.
+
+    Raises:
+        ValueError: Якщо кількість оцінок не відповідає кількості студентів.
+    """
+    for subject, marks in subject_marks.items():
+        if len(marks) != len(student_names):
+            raise ValueError(f"Кількість оцінок у {subject} не відповідає кількості студентів.")
+
+def create_student_data(student_names, subject_marks):
+    """
+    Створює словник із оцінками для кожного студента за всі предмети.
+
+    Args:
+        student_names (list): Список імен студентів.
+        subject_marks (dict): Словник із предметами та їхніми оцінками.
+
+    Returns:
+        dict: Словник з оцінками для кожного студента.
+    """
+    return {
+        student: {subject: subject_marks[subject][i] for subject in subject_marks}
+        for i, student in enumerate(student_names)
+    }
+
+def print_student_data(student_data):
+    """
+    Виводить у консоль дані про кожного студента та обчислює середні оцінки.
+
+    Args:
+        student_data (dict): Словник із даними студентів.
+    """
+    for student, subjects in student_data.items():
+        print(f"Ім'я студента: {student}")
+        print("Оцінки з предметів:")
+        total_marks = 0
+
+        for subject, mark in subjects.items():
+            print(f"{subject}: {mark}")
+            total_marks += mark
+
+        average = total_marks / len(subjects)
+        print(f"Середнє значення оцінок: {average:.2f}")
+        print("-" * 30)
+
+def main():
+    """
+    Основна функція програми, яка виконує весь процес зчитування та виведення даних.
+    """
+    directory = 'student_marks'
+    student_names = get_student_names(directory)
+    subject_files = get_subject_files(directory)
+    subject_marks = read_subject_marks(subject_files, directory)
+    
+    validate_data(student_names, subject_marks)
+    student_data = create_student_data(student_names, subject_marks)
+    
+    print_student_data(student_data)
+
+# Виклик основної функції
+if __name__ == "__main__":
+    main()
+
