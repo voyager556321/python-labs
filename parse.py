@@ -1,21 +1,28 @@
 import os
 
-# Specify the directory containing the .txt files
-directory = 'student_marks'
+def read_txt_files_from_directory(directory):
+    """
+    Зчитує вміст усіх .txt файлів у вказаній директорії та виводить кожен рядок.
+    
+    Args:
+        directory (str): Шлях до директорії, яка містить .txt файли.
+    """
+    # Отримуємо список всіх файлів у директорії
+    files = os.listdir(directory)
 
-# List all files in the specified directory
-files = os.listdir(directory)
+    # Фільтруємо тільки .txt файли
+    txt_files = [file for file in files if file.endswith('.txt')]
 
-# Filter for .txt files
-txt_files = [file for file in files if file.endswith('.txt')]
+    # Перебираємо кожен .txt файл і відкриваємо його для читання
+    for txt_file in txt_files:
+        file_path = os.path.join(directory, txt_file)  # Повний шлях до файлу
+        with open(file_path, 'r') as file:  # Відкриваємо файл для читання
+            content = file.readlines()  # Зчитуємо всі рядки у файлі
+            # Виводимо кожен рядок без зайвих пробілів
+            for line in content:
+                print(line.strip())
 
-# Loop through each .txt file and open it for reading
-for txt_file in txt_files:
-    file_path = os.path.join(directory, txt_file)  # Get the full path to the file
-    with open(file_path, 'r') as file:  # Open the file for reading
-        # Read the content
-        content = file.readlines()  # Read all lines in the file
-        # Parse the data (example: print each line)
-        for line in content:
-            print(line.strip())  # Print each line without extra spaces
+# Приклад виклику функції
+directory_path = 'student_marks'  # Вкажіть вашу директорію
+read_txt_files_from_directory(directory_path)
 
